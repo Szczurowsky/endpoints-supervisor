@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use std::error::Error;
 
 #[derive(Serialize, Deserialize)]
-struct Config {
+pub struct Config {
     database_host: String,
     database_port: i128,
     database_user: String,

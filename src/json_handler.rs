@@ -11,10 +11,11 @@ pub fn init(){
 
     init_app_dir();
 
+    get_config();
 }
 
-pub fn get_config() -> String {
-    return config::read_config().unwrap();
+pub fn get_config() -> config::Config {
+    return serde_json::from_str(&*config::read_config().unwrap()).unwrap();
 }
 
 fn init_app_dir(){
