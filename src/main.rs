@@ -1,3 +1,5 @@
+mod json_handler;
+
 use tokio::net::TcpStream;
 use tokio::time::{sleep, Duration};
 
@@ -11,6 +13,7 @@ async fn main() {
         .with_max_level(tracing::Level::INFO)
         .init();
 
+    json_handler::init();
 
     loop{
         sleep(Duration::from_secs(1)).await;
