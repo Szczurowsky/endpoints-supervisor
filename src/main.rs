@@ -18,7 +18,12 @@ async fn main() {
     loop{
         sleep(Duration::from_secs(1)).await;
         let status = ping_server().await;
-        info!("Status of server: {:?}", status);
+
+        // If return is empty that means we weren't able to reach cloudflare DNS server
+        // which means returned Vec is empty
+        if !status.is_empty(){
+            info!("Status of server: {:?}", status);
+        }
     }
 }
 
@@ -27,6 +32,16 @@ async fn ping_server() -> Vec<bool> {
     let servers = ["1.1.1.1:80", "1.1.1.1:443"];
 
     let mut status_list: Vec<bool> = Vec::new();
+
+    // Check if cloudflare dns server works, if not than we don't have access to internet probably
+    match TcpStream::connect("1.1.1.1:80").await{
+        Ok(_) => {},
+        Err(_) => {
+            error!("Cannot reach cloudflare dns server. \
+        That means you could have problem with internet connection");
+            return status_list;
+        }
+    }
 
     for server_ip in servers.iter(){
         let server = TcpStream::connect(server_ip).await;
