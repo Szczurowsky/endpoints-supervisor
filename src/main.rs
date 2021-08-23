@@ -25,15 +25,16 @@ async fn main() {
 
     let mut status: Vec<bool>;
 
+    // Create vec with list of all nodes which died
+    let mut sent_mails = Vec::new();
+
     loop{
         status = ping_server(load_realtime, loaded_servers.clone()).await;
-        sleep(Duration::from_secs(delay)).await;
         // If return is empty that means we weren't able to reach cloudflare DNS server
         // which means returned Vec is empty
         if !status.is_empty(){
             info!("Status of server: {:?}", status);
-            // Collect all servers which doesn't respond
-            let mut failed_servers = Vec::new();
+            // Check status
             let mut i = 0;
             let mut servers_refreshed = false;
             while i < status.len(){
@@ -48,13 +49,21 @@ async fn main() {
                     // If user will update json in wrong moment than updated servers would not
                     // contain servers which doesnt work
                     if loaded_servers.len() == status.len(){
-                        failed_servers.push(loaded_servers.get(i).unwrap().to_string());
+                        sent_mails = send_mail(sent_mails, loaded_servers.get(i).unwrap().to_string());
+                    }
+                }
+                else{
+                    if sent_mails.contains(&loaded_servers.get(i).unwrap().to_string()){
+                        sent_mails.remove(sent_mails.iter().
+                            position(|r| r == &loaded_servers.get(i)
+                                .unwrap().to_string()).unwrap());
                     }
                 }
                 i = i + 1;
             }
-            info!("{:?}", failed_servers);
         }
+        info!("{:?}", sent_mails);
+        sleep(Duration::from_secs(delay)).await;
     }
 }
 
@@ -92,4 +101,13 @@ async fn ping_server(load_realtime: bool, given_servers: Vec<String>) -> Vec<boo
     }
 
     return status_list;
+}
+
+fn send_mail(mut sent_mails: Vec<String>, address: String) -> Vec<String> {
+    if !sent_mails.contains(&address){
+        // send mail
+        sent_mails.push(address);
+        return sent_mails;
+    }
+    return sent_mails;
 }
