@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 mod json_handler;
 use tokio::net::TcpStream;
 use tokio::time::{sleep, Duration};
@@ -21,6 +23,9 @@ async fn main() {
     let config = json_handler::get_config();
     let load_realtime = config.get_load_realtime();
     let delay = config.get_delay();
+
+    // Init mail
+    json_handler::get_mail();
 
     // Preload all endpoints from file
     let mut loaded_servers = json_handler::get_endpoints().get_endpoints();
