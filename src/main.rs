@@ -1,10 +1,12 @@
 mod json_handler;
-
 use tokio::net::TcpStream;
 use tokio::time::{sleep, Duration};
 
 use tracing::{error, info};
 use tracing_subscriber;
+
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::{Message, SmtpTransport, Transport};
 
 #[tokio::main]
 async fn main() {
@@ -105,7 +107,33 @@ async fn ping_server(load_realtime: bool, given_servers: Vec<String>) -> Vec<boo
 
 fn send_mail(mut sent_mails: Vec<String>, address: String) -> Vec<String> {
     if !sent_mails.contains(&address){
-        // send mail
+
+        //Load mail
+        let mail = json_handler::get_mail();
+        let mail_username = mail.get_username();
+        let mail_password = mail.get_password();
+        let mail_port = mail.get_port();
+        let mail_server = mail.get_server();
+
+        let credentials = Credentials::new(String::from(mail_username), String::from(mail_password));
+        let mailer = SmtpTransport::relay(mail_server)
+            .unwrap()
+            .credentials(credentials)
+            .port(mail_port)
+            .build();
+
+        let email = Message::builder()
+            .from(format!("Endpoints supervisor <{}>", mail_username).parse().unwrap())
+            .to(format!("Customer <{}>", mail.get_destination_mail()).parse().unwrap())
+            .subject("Endpoint Supervisor - Alert")
+            .body(format!("Hi, our system detect that node with ip {} doesnt work properly. Check it ASAP", address))
+            .unwrap();
+
+        match mailer.send(&email){
+            Ok(_) => info!("Sent mail"),
+            Err(e) => error!("{}", e),
+        }
+
         sent_mails.push(address);
         return sent_mails;
     }

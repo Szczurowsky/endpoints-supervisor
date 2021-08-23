@@ -1,5 +1,6 @@
 mod config;
 mod endpoints;
+mod mail;
 
 use directories::ProjectDirs;
 
@@ -20,6 +21,10 @@ pub fn get_config() -> config::Config {
 
 pub fn get_endpoints() -> endpoints::Endpoints {
     return serde_json::from_str(&*endpoints::read_endpoints().unwrap()).unwrap();
+}
+
+pub fn get_mail() -> mail::Mail {
+    return serde_json::from_str(&*mail::read_mail().unwrap()).unwrap();
 }
 
 fn init_app_dir(){
