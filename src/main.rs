@@ -15,21 +15,57 @@ async fn main() {
 
     json_handler::init();
 
-    loop{
-        sleep(Duration::from_secs(1)).await;
-        let status = ping_server().await;
+    // Load field realtime from config
+    let load_realtime = json_handler::get_config().get_load_realtime();
 
+    // Preload all endpoints from file
+    let mut loaded_servers = json_handler::get_endpoints().get_endpoints();
+
+    let mut status: Vec<bool>;
+
+    loop{
+        status = ping_server(load_realtime, loaded_servers.clone()).await;
+        sleep(Duration::from_secs(3)).await;
         // If return is empty that means we weren't able to reach cloudflare DNS server
         // which means returned Vec is empty
         if !status.is_empty(){
             info!("Status of server: {:?}", status);
+            // Collect all servers which doesn't respond
+            let mut failed_servers = Vec::new();
+            let mut i = 0;
+            let mut servers_refreshed = false;
+            while i < status.len(){
+                if !status[i]{
+                    if !servers_refreshed{
+                        if load_realtime{
+                            info!("Updated servers");
+                            loaded_servers = json_handler::get_endpoints().get_endpoints();
+                        }
+                        servers_refreshed = true;
+                    }
+                    // If user will update json in wrong moment than updated servers would not
+                    // contain servers which doesnt work
+                    if loaded_servers.len() == status.len(){
+                        failed_servers.push(loaded_servers.get(i).unwrap().to_string());
+                    }
+                }
+                i = i + 1;
+            }
+            info!("{:?}", failed_servers);
         }
     }
 }
 
-async fn ping_server() -> Vec<bool> {
+async fn ping_server(load_realtime: bool, given_servers: Vec<String>) -> Vec<bool> {
 
-    let servers = ["1.1.1.1:80", "1.1.1.1:443"];
+    let servers: Vec<String>;
+
+    if load_realtime{
+       servers = json_handler::get_endpoints().get_endpoints();
+    }
+    else{
+        servers = given_servers;
+    }
 
     let mut status_list: Vec<bool> = Vec::new();
 

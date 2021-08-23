@@ -1,4 +1,5 @@
 mod config;
+mod endpoints;
 
 use directories::ProjectDirs;
 
@@ -12,10 +13,16 @@ pub fn init(){
     init_app_dir();
 
     get_config();
+
+    get_endpoints();
 }
 
 pub fn get_config() -> config::Config {
     return serde_json::from_str(&*config::read_config().unwrap()).unwrap();
+}
+
+pub fn get_endpoints() -> endpoints::Endpoints {
+    return serde_json::from_str(&*endpoints::read_endpoints().unwrap()).unwrap();
 }
 
 fn init_app_dir(){

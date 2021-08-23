@@ -11,41 +11,45 @@ use std::path::PathBuf;
 use std::error::Error;
 
 #[derive(Serialize, Deserialize)]
-pub struct Config {
-    load_realtime: bool
+pub struct Endpoints {
+    endpoints: Vec<String>,
 }
 
-impl Config{
+impl Endpoints{
 
-    pub fn get_load_realtime(self) -> bool {
-        return self.load_realtime;
+    pub fn get_endpoints(self) -> Vec<String> {
+        return self.endpoints;
     }
 
 }
 
-pub fn read_config () -> Result<String, Box<dyn Error>> {
+pub fn read_endpoints () -> Result<String, Box<dyn Error>> {
 
     if let Some(project_dirs)= ProjectDirs::from("pl", "szczurowsky", "endpoint-supervisor"){
 
         let mut path = PathBuf::from(project_dirs.config_dir());
-        path = path.join("config");
+        path = path.join("endpoints");
         path.set_extension("json");
 
         if !path.exists(){
 
-            info!("Creating config file on {:?}", &path);
+            info!("Creating endpoints file on {:?}", &path);
 
-            let config = Config {
-                load_realtime: false
+            let mut default = Vec::new();
+            default.push("1.1.1.1:80".to_string());
+            default.push("1.1.1.1:443".to_string());
+
+            let endpoints = Endpoints {
+                endpoints: default,
             };
 
-            let file = serde_json::to_string_pretty(&config)?;
+            let file = serde_json::to_string_pretty(&endpoints)?;
 
             match fs::write(&path, &file){
                 Ok(_) => {}
                 Err(e) => {
-                    error!("An error occurred when creating config file {}", e);
-                    return Err("Cannot create config file".into());
+                    error!("An error occurred when creating endpoints file {}", e);
+                    return Err("Cannot create endpoints file".into());
                 }
             }
 
@@ -53,7 +57,7 @@ pub fn read_config () -> Result<String, Box<dyn Error>> {
 
         }
         else{
-            // load config
+            // load endpoints
             let file = fs::read_to_string(&path).unwrap();
 
             return Ok(file);
