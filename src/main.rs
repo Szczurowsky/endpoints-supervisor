@@ -15,8 +15,8 @@ async fn main() {
 
     json_handler::init();
 
-    // Load field realtime from config
-    let load_realtime = json_handler::get_config().get_load_realtime();
+    // Load config
+    let config = json_handler::get_config();
 
     // Preload all endpoints from file
     let mut loaded_servers = json_handler::get_endpoints().get_endpoints();
@@ -24,8 +24,8 @@ async fn main() {
     let mut status: Vec<bool>;
 
     loop{
-        status = ping_server(load_realtime, loaded_servers.clone()).await;
-        sleep(Duration::from_secs(3)).await;
+        status = ping_server(config.get_load_realtime(), loaded_servers.clone()).await;
+        sleep(Duration::from_secs(config.get_delay())).await;
         // If return is empty that means we weren't able to reach cloudflare DNS server
         // which means returned Vec is empty
         if !status.is_empty(){

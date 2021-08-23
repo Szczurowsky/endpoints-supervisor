@@ -12,13 +12,18 @@ use std::error::Error;
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    load_realtime: bool
+    load_realtime: bool,
+    delay: u64
 }
 
 impl Config{
 
     pub fn get_load_realtime(self) -> bool {
         return self.load_realtime;
+    }
+
+    pub fn get_delay(self) -> u64{
+        return self.delay;
     }
 
 }
@@ -36,7 +41,8 @@ pub fn read_config () -> Result<String, Box<dyn Error>> {
             info!("Creating config file on {:?}", &path);
 
             let config = Config {
-                load_realtime: false
+                load_realtime: false,
+                delay: 10
             };
 
             let file = serde_json::to_string_pretty(&config)?;
