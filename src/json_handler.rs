@@ -12,9 +12,6 @@ pub fn init(){
 
     init_app_dir();
 
-    get_config();
-
-    get_endpoints();
 }
 
 pub fn get_config() -> config::Config {

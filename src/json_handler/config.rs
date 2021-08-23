@@ -18,11 +18,11 @@ pub struct Config {
 
 impl Config{
 
-    pub fn get_load_realtime(self) -> bool {
-        return self.load_realtime;
+    pub fn get_load_realtime(&self) -> bool {
+         return self.load_realtime;
     }
 
-    pub fn get_delay(self) -> u64{
+    pub fn get_delay(&self) -> u64{
         return self.delay;
     }
 

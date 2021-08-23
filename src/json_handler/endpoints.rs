@@ -17,7 +17,7 @@ pub struct Endpoints {
 
 impl Endpoints{
 
-    pub fn get_endpoints(self) -> Vec<String> {
+    pub fn get_endpoints(&self) -> Vec<String> {
         return self.endpoints;
     }
 
