@@ -1,8 +1,8 @@
+mod tcp;
+
 use std::error::Error;
 
 use color_eyre::Result;
-
-mod tcp;
 
 #[derive(PartialEq)]
 pub enum Methods{
