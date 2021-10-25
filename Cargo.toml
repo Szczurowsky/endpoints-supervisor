@@ -7,7 +7,7 @@ version = "1.0.0-alpha"
 tokio = { version = "1.9.0", features = ["full"] }
 color-eyre = "0.5"
 tracing = "0.1"
-tracing-subscriber = "0.2.20"
+tracing-subscriber = "0.3.1"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 directories = "4.0.0"
